@@ -1,0 +1,83 @@
+\section{Methodology}
+
+This study explores the application of various Parameter-Efficient Fine-Tuning (PEFT) methods—specifically Adapter, Low-Rank Adaptation (LoRA), Prefix-Tuning, and UniPELT—to IndoLEM tasks, including Named Entity Recognition (NER), Sentiment Analysis, and Summarization. The methodology is organized into several key subsections, covering dataset preparation, model implementation, training procedures, evaluation metrics, experimental design, and reproducibility.
+
+\subsection{Dataset Preparation}
+
+\begin{table}[htbp]
+    \vspace{0.25cm}
+    \centering
+    \caption{Dataset Details}
+    \label{table:dataset-indolem}
+    \resizebox{0.5\textwidth}{!}{
+    \begin{tabular}{lrrrcc}
+        \toprule
+        \textbf{Data} & \textbf{\#train} & \textbf{\#dev} & \textbf{\#test} & \textbf{5-fold} & \textbf{Evaluation} \\
+        \midrule
+        NER UGM & 1.530 & 170 & 425 & \checkmark & micro-averaged F1 \\
+        NER UI & 1.687 & 187 & 469 & \checkmark & micro-averaged F1 \\
+        \textit{Sentiment Analysis} & 3.638 & 399 & 1.011 & \checkmark & F1 \\
+        IndoSum & 14.262 & 750 & 3.762 & \checkmark & ROUGE \\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+The datasets used in this study were obtained from the IndoLEM benchmark, which provides annotated data for NER, Sentiment Analysis, and Summarization tasks. Each dataset underwent careful pre-processing to ensure compatibility with the selected PEFT methods. For the NER task, the dataset includes labeled entities such as persons, organizations, and locations. The Sentiment Analysis dataset is categorized into positive, negative, and neutral classes, while the Summarization dataset comprises paired original and summarized texts. Pre-processing steps involved tokenization, sequence padding, and the conversion of labels into the appropriate format required by the model architectures. The details of dataset used can be seen at table \ref{table:dataset-indolem}.
+
+\subsection{Training Procedure}
+
+The training of each PEFT method was conducted using the Hugging Face Transformers library and Adapters library. IndoBERT and IndoT5 were chosen as the base pre-trained models due to their strong performance in Indonesian language tasks. IndoBERT is a variant of BERT specifically trained on Indonesian text, while IndoT5 is a fine-tuned variant of the T5 model for the Indonesian language.
+
+Each PEFT method was applied to these base models in distinct ways. The Adapter method added small bottleneck layers within each Transformer layer of IndoBERT and IndoT5, with only these adapters being updated during fine-tuning. For LoRA, the weight matrices in these models were decomposed into low-rank matrices, enabling efficient adaptation by modifying a small fraction of the parameters. Prefix-Tuning involved prepending trainable prefix tokens to the input sequences, with these tokens being the only parameters optimized. UniPELT dynamically combined different PEFT methods during training, offering a flexible and adaptive approach.
+
+The training hyperparameters for each method, including learning rate, batch size, and epochs, were selected from previous research. Details of these hyperparameters are provided in the provided script. Training was conducted on an NVIDIA Tesla V100 and A40 GPU to handle large datasets efficiently. NER and Sentiment Analysis used the V100 and Summarization used the A40.
+
+\subsection{Experiment Design}
+
+\begin{table}[htbp]
+    \centering
+    \caption{PEFT Configuration}
+    \label{table:peft-configuration}
+    \begin{tabular}{l|l|c}
+        \toprule
+        \textbf{Method} & \textbf{Argument} & \textbf{Value} \\
+        \midrule
+        LoRA & \texttt{rank} & [8, 16] \\
+        Prefix Tuning & \texttt{prefix\_length} & [5, 50] \\
+        Adapter & \texttt{reduction\_factor} & [64, 16] \\
+        UniPELT & \multicolumn{1}{c|}{-}  & - \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+To comprehensively evaluate the performance of the PEFT methods, a series of experiments were conducted, each corresponding to different configurations of the primary hyperparameters. The configuration for each method can be seen at table \ref{table:peft-configuration}. For LoRA, experiments varied the rank of the low-rank matrix between 8 and 16, affecting the model's capacity to adapt and the number of trainable parameters. Prefix-Tuning experiments tested prefix lengths of 5 and 50, exploring the trade-offs between training speed and contextual information. Adapter experiments utilized reduction factors of 64 and 16, balancing parameter reduction with the model's adaptability. UniPELT was included with its default dynamic configuration.
+
+These variations resulted in eight distinct experiments per task, including a baseline experiment using traditional fine-tuning with full parameter updates. The experiments aimed to explore how different hyperparameter settings impact the balance between computational efficiency and task performance.
+
+The model's performance was evaluated using standard NLP metrics. For NER, the primary metric was the F1 score, with accuracy and exact match scores also calculated. Sentiment Analysis was evaluated using accuracy, precision, recall, and F1 scores. The Summarization task employed ROUGE scores (ROUGE-1, ROUGE-2, and ROUGE-L) to assess the overlap between generated summaries and reference texts.
+
+\subsection{Reproducibility and Code Availability}
+
+Ensuring the reproducibility of the results was a key consideration in this study. All code developed for data processing, model training, and evaluation is publicly available in a GitHub repository (\url{https://github.com/apwic/indolem-peft}), complete with clear documentation. This transparency allows other researchers to replicate the experiments and build upon this work, further advancing the field of NLP for the Indonesian language.
+
+\begin{table*}[!ht]
+    \centering
+    \caption{Model Parameters for IndoBERT and IndoT5}
+    \label{table:param-model}
+    \begin{tabular}{l|r|r}
+        \toprule
+        \textbf{Method} & \textbf{IndoBERT \#Parameter} & \textbf{IndoT5 \#Parameter} \\
+        \midrule
+        \textit{Fine-tuning} & \textbf{110M (100\%)} & \textbf{223M (100\%)} \\
+        LoRA ($r$=8) & 0.294M (0.27\%) & 0.885M (0.40\%) \\
+        LoRA ($r$=16) & 0.590M (0.54\%) & 1.769M (0.79\%) \\
+        Prefix Tuning ($pl$=5) & 9.853M (8.91\%) & 29.560M (13.26\%) \\
+        Prefix Tuning ($pl$=50) & 9.887M (8.94\%) & 29.663M (13.31\%) \\
+        Adapter ($rf$=64) & \textcolor{Green}{0.231M (0.21\%)} & \textcolor{Green}{0.461M (0.21\%)} \\
+        Adapter ($rf$=16) & 0.895M (0.81\%) & 1.789M (0.80\%) \\
+        UniPELT & \textcolor{Red}{11.083M (10.03\%)} & \textcolor{Red}{32.346M (14.51\%)} \\
+        \bottomrule
+    \end{tabular}
+\end{table*}
+
