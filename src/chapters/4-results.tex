@@ -23,9 +23,9 @@ LoRA, particularly with a rank of 8, emerges as the most parameter-efficient met
         LoRA ($r$=16) & \textcolor{Green}{515 (58\%)} & 588 (60\%) & 627 (72\%) & 4900 (97\%) \\
         Prefix Tuning ($pl$=5) & 494 (56\%) & \textcolor{Green}{562 (58\%)} & \textcolor{Green}{619 (72\%)} & 6618 (132\%) \\
         Prefix Tuning ($pl$=50) & 534 (60\%) & 598 (61\%) & 652 (75\%) & \textcolor{Red}{11379 (227\%)} \\
-        Adapter ($rf$=64) & 564 (64\%) & 587 (60\%) & \textcolor{Green}{613 (71\%)} & \textcolor{Green}{4578 (91\%)} \\
+        Adapter ($rf$=64) & 564 (64\%) & 587 (60\%) & {613 (71\%)} & \textcolor{Green}{4578 (91\%)} \\
         Adapter ($rf$=16) & 563 (64\%) & 595 (61\%) & 617 (71\%) & 4587 (91\%) \\
-        UniPELT & \textcolor{Red}{928 (105\%)} & \textcolor{Red}{991 (102\%)} & \textcolor{Red}{746 (86\%)} & \textcolor{Red}{9241 (184\%)} \\
+        UniPELT & \textcolor{Red}{928 (105\%)} & \textcolor{Red}{991 (102\%)} & \textcolor{Red}{746 (86\%)} & 9241 (184\%) \\
         \bottomrule
     \end{tabular}
 
@@ -36,12 +36,12 @@ LoRA, particularly with a rank of 8, emerges as the most parameter-efficient met
         \textbf{Method} & \textbf{NER UI (F1)} & \textbf{NER UGM (F1)} & \textbf{Sentiment (F1)} & \textbf{Summ (ROUGE-L)} \\
         \midrule
         \textit{Fine-tuning} & \textbf{0.952} & \textbf{0.859} & \textbf{0.876} & 65.525 \\
-        LoRA ($r$=8) & 0.930 & 0.813 & 0.838 & \textcolor{Green}{66.538} \\
-        LoRA ($r$=16) & 0.930 & 0.818 & 0.856 & 66.507 \\
-        Prefix Tuning ($pl$=5) & \textcolor{Green}{0.944} & \textcolor{Green}{0.839} & \textcolor{Green}{0.867} & \textcolor{Red}{46.868} \\
+        LoRA ($r$=8) & {0.930} & 0.813 & 0.838 & \textcolor{Green}{66.538} \\
+        LoRA ($r$=16) & \textcolor{Red}{0.930} & 0.818 & 0.856 & 66.507 \\
+        Prefix Tuning ($pl$=5) & \textcolor{Green}{0.944} & \textcolor{Green}{0.839} & \textcolor{Green}{0.867} & 46.868 \\
         Prefix Tuning ($pl$=50) & 0.943 & 0.827 & 0.859 & 66.037 \\
         Adapter ($rf$=64) & 0.938 & 0.824 & 0.852 & 63.634 \\
-        Adapter ($rf$=16) & 0.938 & 0.818 & 0.821 & 56.735 \\
+        Adapter ($rf$=16) & 0.938 & 0.818 & \textcolor{Red}{0.821} & 56.735 \\
         UniPELT & 0.940 & \textcolor{Red}{0.784} & 0.862 & \textcolor{Red}{6.550} \\
         \bottomrule
     \end{tabular}
