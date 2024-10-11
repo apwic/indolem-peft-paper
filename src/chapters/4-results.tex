@@ -12,8 +12,8 @@ LoRA, particularly with a rank of 8, emerges as the most parameter-efficient met
 
 \begin{table*}[!ht]
     \centering
-    \caption{Average Training Runtime (Top) \& Performance Metrics (Bottom)}
-    \label{table:runtime-performance}
+    \caption{Average Training Runtime}
+    \label{table:runtime}
     \begin{tabular}{l|r|r|r|r}
         \toprule
         \textbf{Method} & \textbf{NER UI (s)} & \textbf{NER UGM (s)} & \textbf{Sentiment (s)} & \textbf{Summarization (s)} \\
@@ -28,14 +28,17 @@ LoRA, particularly with a rank of 8, emerges as the most parameter-efficient met
         UniPELT & \textcolor{Red}{928 (105\%)} & \textcolor{Red}{991 (102\%)} & \textcolor{Red}{746 (86\%)} & 9241 (184\%) \\
         \bottomrule
     \end{tabular}
+\end{table*}
 
-    \vspace{0.5cm}
-
+\begin{table*}[!ht]
+    \centering
+    \caption{Performance Metrics}
+    \label{table:performance}
     \begin{tabular}{l|c|c|c|c}
         \toprule
         \textbf{Method} & \textbf{NER UI (F1)} & \textbf{NER UGM (F1)} & \textbf{Sentiment (F1)} & \textbf{Summ (ROUGE-L)} \\
         \midrule
-        \textit{Fine-tuning} & \textbf{0.952} & \textbf{0.859} & \textbf{0.876} & 65.525 \\
+        \textit{Fine-tuning} & \textbf{0.952} & \textbf{0.859} & \textbf{0.876} & \textbf{65.525} \\
         LoRA ($r$=8) & {0.930} & 0.813 & 0.838 & \textcolor{Green}{66.538} \\
         LoRA ($r$=16) & \textcolor{Red}{0.930} & 0.818 & 0.856 & 66.507 \\
         Prefix Tuning ($pl$=5) & \textcolor{Green}{0.944} & \textcolor{Green}{0.839} & \textcolor{Green}{0.867} & 46.868 \\
@@ -47,7 +50,7 @@ LoRA, particularly with a rank of 8, emerges as the most parameter-efficient met
     \end{tabular}
 \end{table*}
 
-Training time is a critical factor when considering the practical deployment of models, particularly in scenarios where time efficiency is paramount. Table \ref{table:runtime-performance} summarizes the average training times for each method across the NER, Sentiment Analysis, and Summarization tasks.
+Training time is a critical factor when considering the practical deployment of models, particularly in scenarios where time efficiency is paramount. Table \ref{table:runtime} summarizes the average training times for each method across the NER, Sentiment Analysis, and Summarization tasks.
 
 For the NER tasks, LoRA and Prefix Tuning significantly reduced training times compared to the fine-tuning baseline. Specifically, LoRA with a rank of 16 achieved the lowest training time, completing the task in 58\% of the time required by fine-tuning. Similarly, Prefix Tuning with a prefix length of 5 reduced training time to 56\% and 58\% for the UI and UGM datasets, respectively. In contrast, UniPELT exhibited increased training times, surpassing the baseline fine-tuning time by approximately 5\% for UI and 2\% for UGM, likely due to the overhead associated with dynamically combining different PEFT strategies during training.
 
@@ -57,7 +60,7 @@ For the Summarization task, Adapter with a reduction factor of 64 again demonstr
 
 \subsection{Performance Metrics}
 
-Performance metrics, including F1 scores for NER and Sentiment Analysis and ROUGE scores for Summarization, provide a direct measure of how well each method performs relative to the baseline. Table \ref{table:runtime-performance} presents a summary of these metrics. In terms of performance, fine-tuning generally provided the best results across all tasks, serving as the baseline. For the NER task, Prefix Tuning with a prefix length of 5 achieved the highest F1 score on the UI dataset (0.944), closely matching the baseline performance, while LoRA and Adapter methods also performed well. However, for the UGM dataset, all PEFT methods exhibited lower F1 scores compared to the baseline, with UniPELT showing the greatest drop to 0.784.
+Performance metrics, including F1 scores for NER and Sentiment Analysis and ROUGE scores for Summarization, provide a direct measure of how well each method performs relative to the baseline. Table \ref{table:performance} presents a summary of these metrics. In terms of performance, fine-tuning generally provided the best results across all tasks, serving as the baseline. For the NER task, Prefix Tuning with a prefix length of 5 achieved the highest F1 score on the UI dataset (0.944), closely matching the baseline performance, while LoRA and Adapter methods also performed well. However, for the UGM dataset, all PEFT methods exhibited lower F1 scores compared to the baseline, with UniPELT showing the greatest drop to 0.784.
 
 For Sentiment Analysis, the fine-tuning baseline outperformed all PEFT methods with an F1 score of 0.876. Among the PEFT methods, Prefix Tuning with a prefix length of 5 again achieved the highest score (0.867), followed by UniPELT with 0.862, indicating that these methods can still achieve competitive performance, albeit with a slight trade-off.
 
@@ -65,8 +68,25 @@ In the Summarization task, the ROUGE scores reflect the ability of the models to
 
 \subsection{Discussion}
 
-The results demonstrate that while PEFT methods like LoRA, Adapter, and Prefix Tuning can significantly reduce the number of trainable parameters and improve training efficiency, there are trade-offs in performance, particularly in tasks requiring extensive sequence generation, such as Summarization. LoRA and Adapter methods generally provided a good balance between efficiency and performance, making them suitable for deployment in resource-constrained environments.
+The results demonstrate the potential of Parameter-Efficient Fine-Tuning (PEFT) methods in achieving competitive performance with reduced computational overhead. However, the effectiveness of each method varies significantly depending on the task and the specific metric evaluated. This section dives deeper into the trade-offs observed and the broader implications for real-world applications of these methods.
 
-UniPELT, while offering the flexibility of combining multiple PEFT methods, showed increased training times and lower performance in some tasks, particularly in Summarization. This suggests that the complexity introduced by combining multiple methods may not always translate into better performance, especially for tasks that are heavily dependent on the model's capacity to generate coherent and contextually accurate text.
+\subsubsection{\textbf{Parameter Efficiency vs. Model Performance}}
+The reduction in trainable parameters is one of the core benefits of PEFT methods. For instance, LoRA with a rank of 8 significantly reduces the number of parameters while maintaining a strong performance, making it ideal for applications where computational resources are limited. This reduction is particularly important in resource-constrained environments, such as mobile devices or edge computing, where deploying full fine-tuning models is often impractical.
 
-Overall, the choice of PEFT method should be guided by the specific requirements of the task, with LoRA and Adapter being strong candidates for scenarios where efficiency is critical, and performance trade-offs are acceptable.
+However, there is a clear trade-off between parameter efficiency and performance. For tasks that require more contextual understanding or longer sequences, such as Summarization, UniPELT and Prefix-Tuning with a longer prefix length (e.g., 50) show diminishing returns, with UniPELT having the most significant performance drop in Summarization tasks. This suggests that methods like UniPELT, which dynamically combine multiple strategies, may introduce overhead that hampers performance in tasks requiring extensive text generation or sequence understanding.
+
+\subsubsection{\textbf{Training Time vs. Efficiency}}
+Training time is another critical factor, particularly for real-time applications or cases where frequent retraining is required, such as in adaptive learning systems or evolving datasets. LoRA and Adapter consistently reduce training time across all tasks compared to traditional fine-tuning. For instance, in NER tasks, LoRA with a rank of 16 reduced the training time by 42\%, while maintaining competitive F1 scores. This makes LoRA a highly efficient method for scenarios where rapid retraining is essential, such as personalized language models or continuous model updates based on new data.
+
+On the other hand, the increased training time for Prefix Tuning with longer prefixes and UniPELT suggests that the additional complexity introduced by these methods may not always justify their use. In Summarization tasks, Prefix Tuning with a prefix length of 50 took over twice as long as fine-tuning, which may be a prohibitive factor in time-sensitive applications. This trade-off between reduced trainable parameters and increased training time implies that Prefix Tuning and UniPELT are better suited for tasks where retraining is infrequent or computational resources are less constrained.
+
+\subsubsection{\textbf{Task-Specific Considerations}}
+The varying performance of PEFT methods across different tasks highlights the importance of choosing the right method based on the specific characteristics of the task at hand. For NER and Sentiment Analysis, methods like LoRA and Adapter consistently offer competitive performance with reduced computational requirements. These tasks typically involve shorter sequences and more localized context, which can be effectively captured with fewer parameters.
+
+In contrast, tasks like Summarization involve generating longer text sequences and require a deeper understanding of context and semantics. This may explain why methods that are optimized for efficiency, such as LoRA and Prefix Tuning with a short prefix length, show less improvement or even degraded performance in this task. UniPELT and Prefix Tuning with longer prefixes performed poorly in Summarization, suggesting that they may struggle to maintain coherent generation in tasks requiring extensive sequence modeling. This further underscores the importance of aligning the choice of PEFT method with the complexity and requirements of the task.
+
+\subsubsection{\textbf{Limitations}}
+While this study highlights the strengths of PEFT methods, it also points to some limitations that warrant further investigation. For instance, while LoRA and Adapter excelled in efficiency and performance for classification tasks, their applicability to more complex generation tasks remains limited. Future research could explore hybrid approaches that combine the strengths of multiple PEFT methods while minimizing their respective weaknesses. Additionally, there is room for optimizing the UniPELT framework to reduce training time while retaining its flexibility.
+
+Furthermore, the study's focus on the Indonesian language opens new avenues for exploring PEFT methods across other low-resource languages. The unique linguistic features of Indonesian may impact how different methods perform, and further studies could extend this work to other languages with similar linguistic structures, helping to generalize the findings across different linguistic contexts.
+
