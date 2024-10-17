@@ -1,6 +1,16 @@
+\begin{figure*}[h]
+    \vspace{0.25cm}
+    \centering
+    \includegraphics[width=0.8\textwidth]{resources/paper_solution.png}
+    \caption{Methodology Workflow}
+    \label{methodology}
+\end{figure*}
+
 \section{Methodology}
 
-This study explores the application of various Parameter-Efficient Fine-Tuning (PEFT) methods—specifically Adapter, Low-Rank Adaptation (LoRA), Prefix-Tuning, and UniPELT—to IndoLEM tasks, including Named Entity Recognition (NER), Sentiment Analysis, and Summarization. The methodology is organized into several key subsections, covering dataset preparation, model implementation, training procedures, evaluation metrics, experimental design, and reproducibility.
+This study applies various Parameter-Efficient Fine-Tuning (PEFT) methods—Adapter, Low-Rank Adaptation (LoRA), Prefix-Tuning, and UniPELT—to IndoLEM tasks: Named Entity Recognition (NER), Sentiment Analysis, and Summarization. Figure \ref{methodology} outlines the overall workflow, starting with dataset preparation, followed by 5-fold cross-validation and data preprocessing. The models are trained using both traditional fine-tuning and PEFT methods, and their performance is evaluated using task-specific metrics such as F1 and ROUGE scores. 
+
+The following subsections provide details on dataset preparation, training procedure, experiment design, and reproducibility.
 
 \subsection{Dataset Preparation}
 
@@ -51,25 +61,6 @@ Each PEFT method was applied in distinct ways:
 
 Training hyperparameters such as learning rate, batch size, and epochs were selected based on previous research. Details are available in the experimental setup script. The training process used NVIDIA Tesla V100 for NER and Sentiment Analysis tasks, while NVIDIA A40 was used for Summarization.
 
-\begin{table*}[!ht]
-    \centering
-    \caption{Model Parameters for IndoBERT and IndoT5}
-    \label{table:param-model}
-    \begin{tabular}{l|r|r}
-        \toprule
-        \textbf{Method} & \textbf{IndoBERT \#Parameter} & \textbf{IndoT5 \#Parameter} \\
-        \midrule
-        \textit{Fine-tuning} & \textbf{110M (100\%)} & \textbf{223M (100\%)} \\
-        LoRA ($r$=8) & 0.294M (0.27\%) & 0.885M (0.40\%) \\
-        LoRA ($r$=16) & 0.590M (0.54\%) & 1.769M (0.79\%) \\
-        Prefix Tuning ($pl$=5) & 9.853M (8.91\%) & 29.560M (13.26\%) \\
-        Prefix Tuning ($pl$=50) & 9.887M (8.94\%) & 29.663M (13.31\%) \\
-        Adapter ($rf$=64) & \textcolor{Green}{0.231M (0.21\%)} & \textcolor{Green}{0.461M (0.21\%)} \\
-        Adapter ($rf$=16) & 0.895M (0.81\%) & 1.789M (0.80\%) \\
-        UniPELT & \textcolor{Red}{11.083M (10.03\%)} & \textcolor{Red}{32.346M (14.51\%)} \\
-        \bottomrule
-    \end{tabular}
-\end{table*}
 
 \subsection{Experiment Design}
 
@@ -99,7 +90,7 @@ Table \ref{table:peft-configuration} shows the key configurations for each PEFT 
 
 The experiments were designed to explore how these configurations affected computational efficiency and task performance. Each experiment included baseline traditional fine-tuning for comparison.
 
-The performance of the models was evaluated using the following metrics for each task:
+The performance of the models was evaluated using the same metrics as in the original IndoLEM paper. These metrics include:
 
 \begin{itemize}
     \item \textbf{NER}: The evaluation used entity-level metrics, including accuracy, precision, recall, and F1 score. These metrics assess how well the model identifies and classifies entities (e.g., persons, organizations, locations) within the text.

@@ -4,6 +4,26 @@ This section presents and analyzes the results of applying various Parameter-Eff
 
 \subsection{Model Parameters}
 
+\begin{table}[!ht]
+    \centering
+    \caption{Model Parameters for IndoBERT and IndoT5}
+    \label{table:param-model}
+    \begin{tabular}{l|r|r}
+        \toprule
+        \textbf{Method} & \textbf{IndoBERT \#Parameter} & \textbf{IndoT5 \#Parameter} \\
+        \midrule
+        \textit{Fine-tuning} & \textbf{110M (100\%)} & \textbf{223M (100\%)} \\
+        LoRA ($r$=8) & 0.294M (0.27\%) & 0.885M (0.40\%) \\
+        LoRA ($r$=16) & 0.590M (0.54\%) & 1.769M (0.79\%) \\
+        Prefix Tuning ($pl$=5) & 9.853M (8.91\%) & 29.560M (13.26\%) \\
+        Prefix Tuning ($pl$=50) & 9.887M (8.94\%) & 29.663M (13.31\%) \\
+        Adapter ($rf$=64) & \textcolor{Green}{0.231M (0.21\%)} & \textcolor{Green}{0.461M (0.21\%)} \\
+        Adapter ($rf$=16) & 0.895M (0.81\%) & 1.789M (0.80\%) \\
+        UniPELT & \textcolor{Red}{11.083M (10.03\%)} & \textcolor{Red}{32.346M (14.51\%)} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 The number of trainable parameters plays a crucial role in determining the efficiency and feasibility of deploying models in resource-constrained environments. Table \ref{table:param-model} shows the significant reduction in the number of parameters when using PEFT methods compared to traditional fine-tuning, which requires updating all model parameters.
 
 LoRA, particularly with a rank of 8, emerges as the most parameter-efficient method, utilizing only 0.27\% of IndoBERT's parameters and 0.40\% of IndoT5's parameters. This drastic reduction indicates that LoRA can significantly decrease the computational resources required without severely impacting the model's capacity to adapt to the task. Similarly, Adapter with a reduction factor of 64 proves to be another highly efficient method, using only 0.21\% of the parameters in both IndoBERT and IndoT5. On the other hand, UniPELT, which combines multiple PEFT methods, has a considerably higher parameter count, particularly for IndoT5, where it requires 14.51\% of the parameters. This trade-off suggests that while UniPELT offers greater flexibility by combining various approaches, it also increases computational demands.
@@ -32,7 +52,7 @@ LoRA, particularly with a rank of 8, emerges as the most parameter-efficient met
 
 \begin{table*}[!ht]
     \centering
-    \caption{Performance Metrics}
+    \caption{Performance Result}
     \label{table:performance}
     \begin{tabular}{l|c|c|c|c}
         \toprule
@@ -68,25 +88,25 @@ In the Summarization task, the ROUGE scores reflect the ability of the models to
 
 \subsection{Discussion}
 
-The results demonstrate the potential of Parameter-Efficient Fine-Tuning (PEFT) methods in achieving competitive performance with reduced computational overhead. However, the effectiveness of each method varies significantly depending on the task and the specific metric evaluated. This section dives deeper into the trade-offs observed and the broader implications for real-world applications of these methods.
+The results demonstrate that Parameter-Efficient Fine-Tuning (PEFT) methods can provide competitive performance with reduced computational needs, though effectiveness varies by task.
 
 \subsubsection{\textbf{Parameter Efficiency vs. Model Performance}}
-The reduction in trainable parameters is one of the core benefits of PEFT methods. For instance, LoRA with a rank of 8 significantly reduces the number of parameters while maintaining a strong performance, making it ideal for applications where computational resources are limited. This reduction is particularly important in resource-constrained environments, such as mobile devices or edge computing, where deploying full fine-tuning models is often impractical.
-
-However, there is a clear trade-off between parameter efficiency and performance. For tasks that require more contextual understanding or longer sequences, such as Summarization, UniPELT and Prefix-Tuning with a longer prefix length (e.g., 50) show diminishing returns, with UniPELT having the most significant performance drop in Summarization tasks. This suggests that methods like UniPELT, which dynamically combine multiple strategies, may introduce overhead that hampers performance in tasks requiring extensive text generation or sequence understanding.
+LoRA, especially with a rank of 8, offers a significant reduction in trainable parameters while maintaining strong performance, making it ideal for resource-constrained settings. However, tasks requiring more context, like Summarization, show diminishing returns for methods like UniPELT and long-prefix Prefix-Tuning, suggesting these methods may introduce overhead that affects performance on longer sequences.
 
 \subsubsection{\textbf{Training Time vs. Efficiency}}
-Training time is another critical factor, particularly for real-time applications or cases where frequent retraining is required, such as in adaptive learning systems or evolving datasets. LoRA and Adapter consistently reduce training time across all tasks compared to traditional fine-tuning. For instance, in NER tasks, LoRA with a rank of 16 reduced the training time by 42\%, while maintaining competitive F1 scores. This makes LoRA a highly efficient method for scenarios where rapid retraining is essential, such as personalized language models or continuous model updates based on new data.
-
-On the other hand, the increased training time for Prefix Tuning with longer prefixes and UniPELT suggests that the additional complexity introduced by these methods may not always justify their use. In Summarization tasks, Prefix Tuning with a prefix length of 50 took over twice as long as fine-tuning, which may be a prohibitive factor in time-sensitive applications. This trade-off between reduced trainable parameters and increased training time implies that Prefix Tuning and UniPELT are better suited for tasks where retraining is infrequent or computational resources are less constrained.
+LoRA and Adapter consistently reduce training time across tasks, making them ideal for scenarios requiring frequent retraining. However, Prefix-Tuning with longer prefixes and UniPELT increased training time, making them less suitable for time-sensitive applications. The balance between reduced parameters and training time should guide method selection based on application needs.
 
 \subsubsection{\textbf{Task-Specific Considerations}}
-The varying performance of PEFT methods across different tasks highlights the importance of choosing the right method based on the specific characteristics of the task at hand. For NER and Sentiment Analysis, methods like LoRA and Adapter consistently offer competitive performance with reduced computational requirements. These tasks typically involve shorter sequences and more localized context, which can be effectively captured with fewer parameters.
+The performance of PEFT methods varies across different tasks, making it crucial to choose the right method based on the task requirements. Key insights include:
 
-In contrast, tasks like Summarization involve generating longer text sequences and require a deeper understanding of context and semantics. This may explain why methods that are optimized for efficiency, such as LoRA and Prefix Tuning with a short prefix length, show less improvement or even degraded performance in this task. UniPELT and Prefix Tuning with longer prefixes performed poorly in Summarization, suggesting that they may struggle to maintain coherent generation in tasks requiring extensive sequence modeling. This further underscores the importance of aligning the choice of PEFT method with the complexity and requirements of the task.
+\begin{itemize}
+    \item \textbf{Named Entity Recognition (NER):} LoRA and Adapter provided the best balance of efficiency and performance, making them ideal for NER tasks. These methods significantly reduced training time while maintaining high F1 scores, making them suitable for resource-constrained environments where quick retraining is essential.
+    \item \textbf{Sentiment Analysis:} Similar to NER, both LoRA and Adapter performed well in Sentiment Analysis tasks, with reduced parameter requirements and training times. Their ability to maintain strong accuracy and F1 scores while reducing computational overhead makes them suitable for tasks requiring frequent updates.
+    \item \textbf{Summarization:} Summarization tasks, which involve longer sequences and more complex context generation, presented more challenges for PEFT methods. While LoRA and Adapter showed moderate effectiveness, longer-prefix Prefix-Tuning and UniPELT struggled with performance degradation and increased training time, suggesting these methods may not be suitable for tasks requiring extensive text generation.
+\end{itemize}
 
 \subsubsection{\textbf{Limitations}}
-While this study highlights the strengths of PEFT methods, it also points to some limitations that warrant further investigation. For instance, while LoRA and Adapter excelled in efficiency and performance for classification tasks, their applicability to more complex generation tasks remains limited. Future research could explore hybrid approaches that combine the strengths of multiple PEFT methods while minimizing their respective weaknesses. Additionally, there is room for optimizing the UniPELT framework to reduce training time while retaining its flexibility.
+While LoRA and Adapter performed well for classification tasks like NER and Sentiment Analysis, their effectiveness in more complex generation tasks, such as Summarization, was limited. Future research should focus on hybrid methods that combine the strengths of multiple PEFT techniques while addressing their weaknesses. Additionally, there is room for optimizing methods like UniPELT to reduce training overhead without sacrificing performance.
 
-Furthermore, the study's focus on the Indonesian language opens new avenues for exploring PEFT methods across other low-resource languages. The unique linguistic features of Indonesian may impact how different methods perform, and further studies could extend this work to other languages with similar linguistic structures, helping to generalize the findings across different linguistic contexts.
+Furthermore, expanding the use of PEFT methods to low-resource languages, particularly languages like Indonesian, offers an exciting research opportunity. The unique linguistic features of these languages may impact how PEFT methods perform, and more studies should be conducted to generalize the findings across different languages and linguistic structures.
 
